@@ -21,6 +21,10 @@ boolean debug = true;
 // 3. Use FX2D, JAVA2D, P2D or P3D
 String renderer = P3D;
 
+float[] colR = {1, 0, 0};
+float[] colG = {0, 1, 0};
+float[] colB = {0, 0, 1};
+
 void setup() {
   //use 2^n to change the dimensions
   size(1024, 1024, renderer);
@@ -86,18 +90,23 @@ void triangleRaster() {
   right[1] = (int)(Math.max(Math.max((float)v1.y(), (float)v2.y()), (float)v3.y()));
   box.put("right", right);
 
-  for (int y = box.get("top")[1]; y <= box.get("right")[1]; y = y + (int)pow(2, n+1)) {
-    for (int x = box.get("top")[0]; x <= box.get("right")[0]; x = x + (int)pow(2, n+1)) {
+  for (float y = box.get("top")[1]; y <= box.get("right")[1]; y = y + pow(2, n)) {
+    for (float x = box.get("top")[0]; x <= box.get("right")[0]; x = x + pow(2, n)) {
       float alpha = f_ab(x, y, v2, v3) / f_ab(v1.x(), v1.y(), v2, v3);
       float beta = f_ab(x, y, v3, v1) / f_ab(v2.x(), v2.y(), v3, v1);
       float gamma = f_ab(x, y, v1, v2) / f_ab(v3.x(), v3.y(), v1, v2);
-      
-      if (alpha >= 0 && beta >0  && gamma >= 0 && alpha <= 0 && beta <= 0 && gamma <= 0) {
+
+      if (alpha >= 0 &&  alpha <= 1 && beta >= 0 &&  beta <= 1 && gamma >= 0 &&  gamma <= 1) {
         Vector p = new Vector(x, y);
+        float r = (alpha * colR[0]) + (beta * colG[0]) + (gamma * colB[0]); 
+        float g = (alpha * colR[1]) + (beta * colG[1]) + (gamma * colB[1]);
+        float b = (alpha * colR[2]) + (beta * colG[2]) + (gamma * colB[2]);
+        float[] rgb = {r*255, g*255, b*255};
         pushStyle();
-        strokeWeight(0.5);
-        stroke(255, 255, 255, 125);
-        point(round(frame.location(p).x()), round(frame.location(p).y()));
+        noStroke();
+        rectMode(CENTER);
+        fill(rgb[0], rgb[1], rgb[2]);
+        rect(frame.location(p).x(), frame.location(p).y(), 0.5, 0.5);
         popStyle();
       }
     }
@@ -105,8 +114,12 @@ void triangleRaster() {
 
   if (debug) {
     pushStyle();
-    stroke(255, 255, 0, 125);
+    stroke(255, 0, 0);
     point(round(frame.location(v1).x()), round(frame.location(v1).y()));
+    stroke(0, 255, 0);
+    point(round(frame.location(v2).x()), round(frame.location(v2).y()));
+    stroke(0, 0, 255);
+    point(round(frame.location(v3).x()), round(frame.location(v3).y()));
     popStyle();
   }
 }
